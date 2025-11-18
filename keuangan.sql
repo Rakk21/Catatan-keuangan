@@ -42,11 +42,7 @@ CREATE TABLE `budget` (
 -- Dumping data for table `budget`
 --
 
-INSERT INTO `budget` (`id`, `kategori`, `bulan`, `tahun`, `jumlah_budget`, `created_at`, `tipe_periode`, `minggu`) VALUES
-(1, 'makan siang', 11, 2025, '35000.00', '2025-11-18 07:33:44', 'bulanan', NULL),
-(2, 'jajan', 11, 2025, '10000.00', '2025-11-18 07:34:18', 'bulanan', NULL),
-(3, 'bensin', 11, 2025, '50000.00', '2025-11-18 07:34:30', 'bulanan', NULL),
-(4, 'Roti, air minum', 11, 2025, '10000.00', '2025-11-18 07:37:48', 'bulanan', NULL);
+
 
 -- --------------------------------------------------------
 
@@ -77,17 +73,7 @@ CREATE TABLE `transaksi` (
 -- Dumping data for table `transaksi`
 --
 
-INSERT INTO `transaksi` (`id`, `tanggal`, `jenis`, `deskripsi`, `jumlah`) VALUES
-(16, '2025-11-17', 'masuk', 'Jatah', 575000),
-(17, '2025-11-17', 'keluar', 'bensin', 20000),
-(19, '2025-11-17', 'keluar', 'makan siang', 13000),
-(20, '2025-11-17', 'keluar', 'monthly fee', 9000),
-(21, '2025-11-17', 'keluar', 'jajan', 2000),
-(22, '2025-11-17', 'keluar', 'makan malam', 15000),
-(24, '2025-11-18', 'keluar', 'Roti, air minum', 5000),
-(27, '2025-11-18', 'keluar', 'Makan siang', 20000),
-(28, '2025-11-18', 'keluar', 'Aoka', 2500),
-(29, '2025-11-18', 'masuk', 'Sisa pecahan', 323);
+
 
 -- --------------------------------------------------------
 
@@ -108,11 +94,9 @@ CREATE TABLE `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `username`, `email`, `password`, `nama_lengkap`, `created_at`) VALUES
-(1, 'rakadit21', 'dityaka8@gmail.com', 'scrypt:32768:8:1$5D5AhTTLAD1yzcpN$22a4e9e5549180b109cfe8c61eb05a37d1dfc552d883bb500a8f119110d820d8f09dd441d4a9642082f2e587e4adaac5b45f65241e1c8c6d3d2614ca09d4b4c2', 'Raka Aditya', '2025-11-17 07:40:45.022858'),
-(2, 'ling21', 'lingga@gmail.com', 'scrypt:32768:8:1$mfEWU1W2M8Nqxh2L$b2ebfc892ca8f15dccb0d5e5cc28e2aad4dbf7b23a3b6264697ee48f29742df8a7ac5c9ae80c25149a1bfc6a7f93630b4c1521af538b7df47d295c1f5da4e2d9', 'Lingga', '2025-11-17 07:44:59.882784');
 
---
+
+
 -- Indexes for dumped tables
 --
 
