@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catatan Keuangan </title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+
+/* ============================================================
+   PURE FINANCE UI — CLEAN NAVBAR + PREMIUM DROPDOWN + DARK MODE
+   ============================================================ */
+
+body {
+    background: #f3f4f7;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1a1a1a;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================================
+   DARK MODE STYLES
+   ============================================================ */
+body.dark-mode {
+    background: #1a1d2e;
+    color: #e8eaed;
+}
+
+body.dark-mode .navbar-finance {
+    background: rgba(30, 33, 48, 0.85);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3),
+                inset 0 0 25px rgba(255,255,255,0.05);
+}
+
+body.dark-mode .nav-link {
+    color: #b8bcc4 !important;
+}
+
+body.dark-mode .nav-link:hover {
+    background: rgba(255,255,255,0.08);
+    color: #5fa3ff !important;
+}
+
+body.dark-mode .nav-link.active {
+    background: rgba(95, 163, 255, 0.2);
+    color: #5fa3ff !important;
+}
+
+body.dark-mode .card {
+    background: #242736;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .table {
+    color: #e8eaed;
+}
+
+body.dark-mode .table-light {
+    background: #2a2d3e;
+    color: #e8eaed;
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background: #2a2d3e;
+    border-color: rgba(255,255,255,0.1);
+    color: #e8eaed;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    background: #2a2d3e;
+    border-color: #5fa3ff;
+    color: #e8eaed;
+}
+
+body.dark-mode .dropdown-menu {
+    background: rgba(30, 33, 48, 0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+body.dark-mode .dropdown-header-box {
+    background: rgba(95, 163, 255, 0.15);
+}
+
+body.dark-mode .dropdown-header-box .name {
+    color: #5fa3ff;
+}
+
+body.dark-mode .dropdown-header-box .username {
+    color: #b8bcc4;
+}
+
+body.dark-mode .dropdown-item {
+    color: #b8bcc4;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: #5fa3ff;
+}
+
+body.dark-mode .alert {
+    background: #2a2d3e;
+    border-color: rgba(255,255,255,0.1);
+    color: #e8eaed;
+}
+
+body.dark-mode .badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+body.dark-mode .badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+body.dark-mode .text-muted {
+    color: #7d8190 !important;
+}
+
+body.dark-mode .btn-outline-primary {
+    border-color: #5fa3ff;
+    color: #5fa3ff;
+}
+
+body.dark-mode .btn-outline-primary:hover {
+    background-color: #5fa3ff;
+    color: white;
+}
+
+body.dark-mode .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+body.dark-mode .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* NAVBAR */
+.navbar-finance {
+    margin: 24px auto;
+    padding: 16px 26px;
+    max-width: 1260px;
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.5);
+
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06),
+                inset 0 0 25px rgba(255,255,255,0.25);
+    transition: all 0.3s ease;
+}
+
+/* BRAND */
+.navbar-finance .navbar-brand {
+    font-weight: 800;
+    font-size: 1.45rem;
+    background: linear-gradient(90deg, #0055ff, #00bbff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* NAV LINK */
+.navbar-finance .nav-link {
+    padding: 10px 20px !important;
+    border-radius: 14px;
+    font-weight: 500;
+    color: #333 !important;
+    transition: 0.25s;
+}
+
+.navbar-finance .nav-link:hover {
+    background: rgba(0,102,255,0.06);
+    color: #0041d9 !important;
+}
+
+.navbar-finance .nav-link.active {
+    background: rgba(0,102,255,0.15);
+    color: #0041d9 !important;
+    font-weight: 600;
+}
+
+/* USER BUTTON */
+.user-profile-btn {
+    padding: 8px 18px !important;
+    border-radius: 14px;
+    background: rgba(0,102,255,0.08);
+    color: #0041d9 !important;
+    font-weight: 600;
+    border: none;
+    transition: 0.25s ease;
+}
+
+.user-profile-btn:hover {
+    background: rgba(0,102,255,0.15);
+    transform: translateY(-1px);
+}
+
+/* AVATAR */
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0055ff, #00bbff);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-right: 8px;
+}
+
+/* ============================================================
+   DARK MODE TOGGLE BUTTON
+   ============================================================ */
+#darkModeToggle {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+#darkModeToggle:hover {
+    transform: scale(1.1);
+}
+
+#darkModeIcon {
+    font-size: 1.2rem;
+}
+
+/* ============================================================
+   NEW CLEAN PREMIUM DROPDOWN
+   ============================================================ */
+
+.dropdown-menu {
+    border-radius: 18px;
+    padding: 12px;
+    margin-top: 10px;
+    min-width: 230px;
+
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+}
+
+/* Profile card box */
+.dropdown-header-box {
+    background: rgba(0,102,255,0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-header-box .name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #0041d9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dropdown-header-box .username {
+    font-size: 0.85rem;
+    color: #777;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Items */
+.dropdown-item {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.25s;
+}
+
+.dropdown-item i {
+    font-size: 1rem;
+}
+
+/* Hover */
+.dropdown-item:hover {
+    background: rgba(0,102,255,0.10);
+    color: #0041d9;
+}
+
+.dropdown-item.text-danger:hover {
+    background: rgba(220,53,69,0.12);
+    color: #c82333 !important;
+}
+
+/* CARD STYLE USED IN CONTENT */
+.card {
+    background: white;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+}
+
+/* =====================================
+   FIX DROPDOWN TERTUTUP ELEMEN LAIN
+===================================== */
+.nav-item.dropdown {
+    position: relative;
+    z-index: 9999;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 99999 !important;
+}
+
+/* Fade + slide animation */
+.dropdown-menu {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    visibility: hidden;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0px);
+    visibility: visible;
+}
+
+</style>
+</head>
+
+<body>
+
+
+    
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-finance">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="{{ url_for('index') }}">💰 Keuangan</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+                       href="{{ url_for('index') }}">
+                       <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'data' %}active{% endif %}"
+                       href="{{ url_for('data') }}">
+                       <i class="bi bi-table me-1"></i> Data
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'tambah' %}active{% endif %}"
+                       href="{{ url_for('tambah') }}">
+                       <i class="bi bi-plus-circle me-1"></i> Tambah
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'laporan' %}active{% endif %}"
+                       href="{{ url_for('laporan') }}">
+                       <i class="bi bi-file-earmark-text me-1"></i> Laporan
+                    </a>
+                </li>
+
+                <li class="nav-item">
+    <a class="nav-link {% if request.endpoint == 'budget' %}active{% endif %}"
+       href="{{ url_for('budget') }}">
+       <i class="bi bi-piggy-bank me-1"></i> Budget
+    </a>
+</li>
+
+                <!-- DARK MODE TOGGLE -->
+                <li class="nav-item">
+                    <button class="nav-link border-0 bg-transparent" id="darkModeToggle" title="Toggle Dark Mode">
+                        <i class="bi bi-moon-stars-fill" id="darkModeIcon"></i>
+                    </button>
+                </li>
+
+                {% if session.get('user_id') %}
+                <!-- USER DROPDOWN -->
+                <li class="nav-item dropdown">
+
+                    <button class="btn dropdown-toggle user-profile-btn"
+                            id="userDropdown" data-bs-toggle="dropdown">
+
+                        <span class="user-avatar">
+                            {{ session.get('username', 'U')[0]|upper }}
+                        </span>
+
+                        <span class="d-none d-lg-inline">
+                            {{ session.get('username') }}
+                        </span>
+
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+
+                        <li>
+                            <div class="dropdown-header-box">
+                                <div class="name">
+                                    {{ session.get('nama_lengkap', session.get('username')) }}
+                                </div>
+                                <div class="username">
+                                    @{{ session.get('username') }}
+                                </div>
+                            </div>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('index') }}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('data') }}">
+                                <i class="bi bi-table"></i> Data
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
+
+    </div>
+</nav>
+
+<!-- FLASH MESSAGE -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert"
+             style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+<div class="container mb-5">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- DARK MODE SCRIPT -->
+<script>
+// Dark Mode Toggle
+(function() {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const darkModeIcon = document.getElementById('darkModeIcon');
+    const body = document.body;
+    
+    // Check saved preference or system preference
+    const savedMode = localStorage.getItem('darkMode');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Apply initial mode
+    if (savedMode === 'true' || (!savedMode && systemPrefersDark)) {
+        body.classList.add('dark-mode');
+        updateIcon(true);
+    }
+    
+    // Toggle function
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', function() {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateIcon(isDark);
+        });
+    }
+    
+    // Update icon
+    function updateIcon(isDark) {
+        if (isDark) {
+            darkModeIcon.className = 'bi bi-sun-fill';
+        } else {
+            darkModeIcon.className = 'bi bi-moon-stars-fill';
+        }
+    }
+})();
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

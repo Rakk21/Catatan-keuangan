@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Aplikasi Keuangan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+        }
+        .register-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-register:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card register-card">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h1 class="display-4">💰</h1>
+                            <h3 class="fw-bold">Daftar Akun Baru</h3>
+                            <p class="text-muted">Kelola keuangan Anda dengan mudah</p>
+                        </div>
+
+                        <!-- Flash Messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-person-badge"></i> Nama Lengkap
+                                </label>
+                                <input type="text" class="form-control" name="nama_lengkap" 
+                                       placeholder="Masukkan nama lengkap" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-person"></i> Username
+                                </label>
+                                <input type="text" class="form-control" name="username" 
+                                       placeholder="Pilih username" required minlength="3">
+                                <small class="text-muted">Minimal 3 karakter</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-envelope"></i> Email
+                                </label>
+                                <input type="email" class="form-control" name="email" 
+                                       placeholder="email@example.com" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-lock"></i> Password
+                                </label>
+                                <input type="password" class="form-control" name="password" id="password"
+                                       placeholder="Minimal 6 karakter" required minlength="6">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-lock-fill"></i> Konfirmasi Password
+                                </label>
+                                <input type="password" class="form-control" name="confirm_password" id="confirm_password"
+                                       placeholder="Ketik ulang password" required>
+                                <small id="passwordHelp" class="text-muted"></small>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary btn-lg btn-register">
+                                    <i class="bi bi-person-plus"></i> Daftar Sekarang
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">
+                                    Sudah punya akun? 
+                                    <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Login di sini</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <small class="text-white">© 2025 Aplikasi Keuangan. All rights reserved.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validasi password match
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const passwordHelp = document.getElementById('passwordHelp');
+        const form = document.getElementById('registerForm');
+
+        function checkPassword() {
+            if (confirmPassword.value === '') {
+                passwordHelp.textContent = '';
+                passwordHelp.className = 'text-muted';
+                return;
+            }
+
+            if (password.value === confirmPassword.value) {
+                passwordHelp.textContent = '✓ Password cocok';
+                passwordHelp.className = 'text-success';
+                confirmPassword.setCustomValidity('');
+            } else {
+                passwordHelp.textContent = '✗ Password tidak cocok';
+                passwordHelp.className = 'text-danger';
+                confirmPassword.setCustomValidity('Password tidak cocok');
+            }
+        }
+
+        confirmPassword.addEventListener('input', checkPassword);
+        password.addEventListener('input', checkPassword);
+    </script>
+</body>
+</html>

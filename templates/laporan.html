@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-text"></i> Laporan Bulanan</h2>
+        <button onclick="window.print()" class="btn btn-success">
+            <i class="bi bi-printer"></i> Cetak/PDF
+        </button>
+    </div>
+
+    <!-- Filter Bulan & Tahun -->
+    <div class="card shadow mb-4 no-print">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('laporan') }}" class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Bulan</label>
+                    <select name="bulan" class="form-select form-select-lg">
+                        {% for i in range(1, 13) %}
+                        <option value="{{ i }}" {{ 'selected' if i == bulan else '' }}>
+                            {{ nama_bulan[i-1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Tahun</label>
+                    <select name="tahun" class="form-select form-select-lg">
+                        {% for t in tahun_list %}
+                        <option value="{{ t }}" {{ 'selected' if t == tahun else '' }}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-search"></i> Tampilkan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Laporan -->
+    <div class="alert alert-info mb-4">
+        <h5 class="mb-0">
+            <i class="bi bi-calendar3"></i> 
+            Laporan Bulan <strong>{{ nama_bulan[bulan-1] }} {{ tahun }}</strong>
+        </h5>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white shadow h-100">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Total Pemasukan</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(total_pemasukan) }}</h3>
+                    <small class="opacity-75">{{ pemasukan_per_kategori|length }} kategori</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-danger text-white shadow h-100">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Total Pengeluaran</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(total_pengeluaran) }}</h3>
+                    <small class="opacity-75">{{ pengeluaran_per_kategori|length }} kategori</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-{{ 'primary' if saldo >= 0 else 'warning' }} text-white shadow h-100">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Saldo Bulan Ini</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(saldo) }}</h3>
+                    <small class="opacity-75">
+                        {{ 'Surplus' if saldo >= 0 else 'Defisit' }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart & Breakdown -->
+    <div class="row mb-4">
+        <!-- Pie Chart Pengeluaran -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Pengeluaran per Kategori</h5>
+                    {% if pengeluaran_per_kategori %}
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="pengeluaranChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-pie-chart" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-3">Belum ada pengeluaran bulan ini</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bar Chart Perbandingan -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Perbandingan Pemasukan vs Pengeluaran</h5>
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="perbandinganChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Pengeluaran per Kategori -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Detail Pengeluaran per Kategori</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kategori</th>
+                            <th class="text-center">Jumlah Transaksi</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Persentase</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in pengeluaran_per_kategori %}
+                        <tr>
+                            <td><strong>{{ k[0] }}</strong></td>
+                            <td class="text-center">{{ k[2] }}x</td>
+                            <td class="text-end">Rp {{ "{:,.0f}".format(k[1]) }}</td>
+                            <td class="text-end">
+                                <span class="badge bg-danger">
+                                    {{ "%.1f"|format((k[1] / total_pengeluaran * 100) if total_pengeluaran > 0 else 0) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not pengeluaran_per_kategori %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Tidak ada pengeluaran</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Pemasukan per Kategori -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Detail Pemasukan per Kategori</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kategori</th>
+                            <th class="text-center">Jumlah Transaksi</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Persentase</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in pemasukan_per_kategori %}
+                        <tr>
+                            <td><strong>{{ k[0] }}</strong></td>
+                            <td class="text-center">{{ k[2] }}x</td>
+                            <td class="text-end">Rp {{ "{:,.0f}".format(k[1]) }}</td>
+                            <td class="text-end">
+                                <span class="badge bg-success">
+                                    {{ "%.1f"|format((k[1] / total_pemasukan * 100) if total_pemasukan > 0 else 0) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not pemasukan_per_kategori %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Tidak ada pemasukan</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semua Transaksi Bulan Ini -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Semua Transaksi ({{ transaksi|length }})</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Kategori</th>
+                            <th>Jenis</th>
+                            <th class="text-end">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transaksi %}
+                        <tr>
+                            <td>{{ t[1] }}</td>
+                            <td>{{ t[3] }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if t[2] == 'masuk' else 'danger' }}">
+                                    {{ 'Pemasukan' if t[2] == 'masuk' else 'Pengeluaran' }}
+                                </span>
+                            </td>
+                            <td class="text-end">Rp {{ "{:,.0f}".format(t[4]) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% if not transaksi %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                Tidak ada transaksi bulan ini
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data untuk Chart (hidden) -->
+<div id="chartData" style="display:none;"
+     data-total-pemasukan="{{ total_pemasukan }}"
+     data-total-pengeluaran="{{ total_pengeluaran }}"
+     data-pengeluaran-kategori='{{ pengeluaran_per_kategori|tojson }}'
+></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Laporan page loaded');
+    
+    // Check if Chart.js loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js tidak dimuat!');
+        alert('Error: Chart.js tidak dimuat. Refresh halaman.');
+        return;
+    }
+    
+    console.log('Chart.js loaded successfully');
+    
+    // Get data from hidden div
+    const dataEl = document.getElementById('chartData');
+    const totalPemasukan = parseFloat(dataEl.dataset.totalPemasukan) || 0;
+    const totalPengeluaran = parseFloat(dataEl.dataset.totalPengeluaran) || 0;
+    
+    let pengeluaranKategori = [];
+    try {
+        pengeluaranKategori = JSON.parse(dataEl.dataset.pengeluaranKategori || '[]');
+    } catch(e) {
+        console.error('Error parsing kategori data:', e);
+    }
+    
+    console.log('Data loaded:', {
+        totalPemasukan,
+        totalPengeluaran,
+        pengeluaranKategori
+    });
+
+    // Chart Pengeluaran (hanya jika ada data)
+    if (pengeluaranKategori.length > 0) {
+        const ctxPengeluaran = document.getElementById('pengeluaranChart');
+        if (ctxPengeluaran) {
+            console.log('Creating pie chart...');
+            
+            const labels = pengeluaranKategori.map(k => k[0]);
+            const values = pengeluaranKategori.map(k => k[1]);
+            
+            new Chart(ctxPengeluaran.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(201, 203, 207, 0.7)',
+                            'rgba(255, 205, 86, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Pie chart created');
+        }
+    }
+
+    // Chart Perbandingan
+    const ctxPerbandingan = document.getElementById('perbandinganChart');
+    if (ctxPerbandingan) {
+        console.log('Creating bar chart...');
+        
+        new Chart(ctxPerbandingan.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Pemasukan', 'Pengeluaran'],
+                datasets: [{
+                    label: 'Jumlah (Rp)',
+                    data: [totalPemasukan, totalPengeluaran],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        console.log('Bar chart created');
+    }
+    
+    console.log('All charts initialized');
+});
+</script>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .card { page-break-inside: avoid; }
+    body { background: white; }
+}
+</style>
+{% endblock %}

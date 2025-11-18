@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Edit Transaksi
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('edit', id=transaksi[0]) }}">
+                        <!-- Jenis Transaksi -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Jenis Transaksi</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="jenis" id="jenisMasuk" value="masuk" 
+                                       {{ 'checked' if transaksi[2] == 'masuk' else '' }}>
+                                <label class="btn btn-outline-success" for="jenisMasuk">
+                                    <i class="bi bi-arrow-down-circle"></i> Pemasukan
+                                </label>
+
+                                <input type="radio" class="btn-check" name="jenis" id="jenisKeluar" value="keluar"
+                                       {{ 'checked' if transaksi[2] == 'keluar' else '' }}>
+                                <label class="btn btn-outline-danger" for="jenisKeluar">
+                                    <i class="bi bi-arrow-up-circle"></i> Pengeluaran
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Tanggal -->
+                        <div class="mb-3">
+                            <label for="tanggal" class="form-label fw-bold">
+                                <i class="bi bi-calendar3"></i> Tanggal
+                            </label>
+                            <input type="date" class="form-control form-control-lg" id="tanggal" name="tanggal" 
+                                   value="{{ transaksi[1] }}" required>
+                        </div>
+
+                        <!-- Deskripsi/Keterangan -->
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label fw-bold">
+                                <i class="bi bi-file-text"></i> Deskripsi/Kategori
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="deskripsi" name="deskripsi" 
+                                   value="{{ transaksi[3] }}" placeholder="Contoh: Gaji, Makan Siang, Transport" required>
+                        </div>
+
+                        <!-- Jumlah -->
+                        <div class="mb-4">
+                            <label for="jumlah" class="form-label fw-bold">
+                                <i class="bi bi-cash-coin"></i> Jumlah (Rp)
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" id="jumlah" name="jumlah" 
+                                       value="{{ transaksi[4] }}" min="0" step="1" required>
+                            </div>
+                            <div class="form-text">Masukkan nominal dalam rupiah</div>
+                        </div>
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Nominal Cepat</label>
+                            <div class="d-grid gap-2">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm quick-amount" data-amount="10000">10rb</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm quick-amount" data-amount="20000">20rb</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm quick-amount" data-amount="50000">50rb</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm quick-amount" data-amount="100000">100rb</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg text-dark">
+                                <i class="bi bi-check-circle"></i> Update Transaksi
+                            </button>
+                            <a href="{{ url_for('data') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Batal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="alert alert-warning mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> 
+                <strong>Perhatian:</strong> Perubahan akan langsung tersimpan dan mempengaruhi perhitungan saldo.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Quick amount buttons
+document.querySelectorAll('.quick-amount').forEach(button => {
+    button.addEventListener('click', function() {
+        const amount = this.dataset.amount;
+        document.getElementById('jumlah').value = amount;
+    });
+});
+
+// Format number input
+const jumlahInput = document.getElementById('jumlah');
+jumlahInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+// Visual feedback for jenis selection
+document.querySelectorAll('input[name="jenis"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const card = document.querySelector('.card');
+        if (this.value === 'masuk') {
+            card.classList.remove('border-danger');
+            card.classList.add('border-success');
+        } else {
+            card.classList.remove('border-success');
+            card.classList.add('border-danger');
+        }
+    });
+});
+
+// Set initial border color
+const jenisValue = document.querySelector('input[name="jenis"]:checked').value;
+const card = document.querySelector('.card');
+if (jenisValue === 'masuk') {
+    card.classList.add('border-success');
+} else {
+    card.classList.add('border-danger');
+}
+</script>
+
+<style>
+.card {
+    border-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+}
+
+.btn-check:checked + .btn-outline-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-check:checked + .btn-outline-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.quick-amount:hover {
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+</style>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-piggy-bank"></i> Budget Tracking</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBudgetModal">
+            <i class="bi bi-plus-circle"></i> Set Budget
+        </button>
+    </div>
+
+    <!-- Filter Bulan & Tahun -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('budget') }}" class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Bulan</label>
+                    <select name="bulan" class="form-select form-select-lg">
+                        {% for i in range(1, 13) %}
+                        <option value="{{ i }}" {% if i == bulan %}selected{% endif %}>
+                            {{ nama_bulan[i-1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">Tahun</label>
+                    <select name="tahun" class="form-select form-select-lg">
+                        {% for t in tahun_list %}
+                        <option value="{{ t }}" {% if t == tahun %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-search"></i> Lihat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Period -->
+    <div class="alert alert-info mb-4">
+        <h5 class="mb-0">
+            <i class="bi bi-calendar3"></i> 
+            Budget Bulan <strong>{{ nama_bulan[bulan-1] }} {{ tahun }}</strong>
+        </h5>
+    </div>
+
+    <!-- Total Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h6 class="opacity-75">Total Budget</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(total_budget) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body">
+                    <h6 class="opacity-75">Total Pengeluaran</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(total_actual) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            {% set sisa_total = total_budget - total_actual %}
+            <div class="card {% if sisa_total >= 0 %}bg-success{% else %}bg-warning{% endif %} text-white shadow">
+                <div class="card-body">
+                    <h6 class="opacity-75">{% if sisa_total >= 0 %}Sisa Budget{% else %}Over Budget{% endif %}</h6>
+                    <h3 class="mb-0">Rp {{ "{:,.0f}".format(sisa_total|abs) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget per Kategori -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-4">Budget per Kategori</h5>
+            
+            {% if budget_summary %}
+                {% for item in budget_summary %}
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">{{ item.kategori }}</h6>
+                            <small class="text-muted">
+                                Rp {{ "{:,.0f}".format(item.actual) }} / Rp {{ "{:,.0f}".format(item.budget) }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ item.status }} fs-6">
+                                {{ "%.0f"|format(item.percentage_full) }}%
+                            </span>
+                            {% if item.budget > 0 %}
+                            <form method="POST" action="{{ url_for('delete_budget', kategori=item.kategori, bulan=bulan, tahun=tahun) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2"
+                                        onclick="return confirm('Yakin ingin menghapus budget untuk {{ item.kategori }}?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-{{ item.status }}" 
+                             role="progressbar" 
+                        
+                             aria-valuenow="{{ item.percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {% if item.percentage > 10 %}
+                                {{ item.percentage_full|round|int }}%
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Info -->
+                    <div class="mt-2">
+                        {% if item.budget > 0 %}
+                            {% if item.sisa >= 0 %}
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle"></i> 
+                                    Sisa: Rp {{ "{:,.0f}".format(item.sisa) }}
+                                </small>
+                            {% else %}
+                                <small class="text-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    Over: Rp {{ "{:,.0f}".format(abs(item.sisa)) }}
+                                </small>
+                            {% endif %}
+                        {% else %}
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                Budget belum diset
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+                <hr class="my-3">
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-piggy-bank" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="mt-3">Belum ada kategori pengeluaran bulan ini</p>
+                    <p>Mulai tambah transaksi untuk tracking budget</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Budget -->
+<div class="modal fade" id="addBudgetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Set Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('set_budget') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="kategori" class="form-select" required>
+                            <option value="">Pilih Kategori</option>
+                            {% for k in kategori_list %}
+                            <option value="{{ k }}">{{ k }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Bulan</label>
+                            <select name="bulan" class="form-select" required>
+                                {% for i in range(1, 13) %}
+                                <option value="{{ i }}" {% if i == bulan %}selected{% endif %}>
+                                    {{ nama_bulan[i-1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tahun</label>
+                            <select name="tahun" class="form-select" required>
+                                {% for t in tahun_list %}
+                                <option value="{{ t }}" {% if t == tahun %}selected{% endif %}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Budget (Rp)</label>
+                        <input type="number" name="jumlah" class="form-control" 
+                               placeholder="Contoh: 500000" min="0" step="1000" required>
+                        <div class="form-text">Masukkan target maksimal pengeluaran</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    font-weight: 600;
+    transition: width 0.6s ease;
+}
+</style>
+{% endblock %}

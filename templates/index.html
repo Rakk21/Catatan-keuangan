@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    /* ====== PREMIUM SULTAN STYLE ====== */
+    .card-premium {
+        border-radius: 18px;
+        padding: 22px;
+        background: linear-gradient(145deg, #ffffff, #f2f2f2);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e6e6e6;
+    }
+
+    .card-premium h5 {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .card-income {
+        background: linear-gradient(135deg, #00C851, #007E33);
+        color: white;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 7px 18px rgba(0, 200, 81, 0.3);
+    }
+
+    .card-expense {
+        background: linear-gradient(135deg, #ff4444, #CC0000);
+        color: white;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 7px 18px rgba(255, 68, 68, 0.3);
+    }
+
+    .card-saldo {
+        background: linear-gradient(135deg, #4285F4, #0d47a1);
+        color: white;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 7px 18px rgba(66, 133, 244, 0.3);
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 320px;
+        padding: 10px;
+    }
+</style>
+
+<div class="container mt-3">
+
+    <h2 class="mb-4 fw-bold">📊 Dashboard Keuangan</h2>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card-income">
+                <h6>Total Pemasukan</h6>
+                <h3 class="fw-bold">Rp {{ "{:,.0f}".format(total_pemasukan) }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card-expense">
+                <h6>Total Pengeluaran</h6>
+                <h3 class="fw-bold">Rp {{ "{:,.0f}".format(total_pengeluaran) }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card-saldo">
+                <h6>Saldo Saat Ini</h6>
+                <h3 class="fw-bold">Rp {{ "{:,.0f}".format(saldo) }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row mb-4">
+
+        <div class="col-md-6 mb-3">
+            <div class="card-premium">
+                <h5 class="mb-3">📉 Pemasukan vs Pengeluaran</h5>
+                <div class="chart-wrapper">
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card-premium">
+                <h5 class="mb-3">🧾 Pengeluaran per Kategori</h5>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-premium">
+                <h5 class="mb-3">📈 Trend Transaksi Bulanan</h5>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSAKSI TERBARU -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card-premium">
+                <h5 class="mb-3">🕒 Transaksi Terbaru</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="fw-semibold">
+                                <th>Tanggal</th>
+                                <th>Kategori</th>
+                                <th>Jenis</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for trx in transaksi_terbaru %}
+                            <tr>
+                                <td>{{ trx.tanggal }}</td>
+
+                                <!-- deskripsi = kategori -->
+                                <td>{{ trx.deskripsi }}</td>
+
+                                <td>
+                                    <span class="badge bg-{{ 'success' if trx.jenis=='masuk' else 'danger' }}">
+                                        {{ 'Pemasukan' if trx.jenis=='masuk' else 'Pengeluaran' }}
+                                    </span>
+                                </td>
+
+                                <td>Rp {{ "{:,.0f}".format(trx.jumlah) }}</td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <a href="{{ url_for('data') }}" class="btn btn-outline-primary btn-sm mt-2">Lihat Semua Transaksi</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!--     CHART JS SECTION     -->
+<!-- ========================= -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const data = JSON.parse(`{{ chart_data | tojson }}`);
+
+    /* Bar Chart */
+    new Chart(incomeExpenseChart, {
+        type: 'bar',
+        data: {
+            labels: ['Pemasukan', 'Pengeluaran'],
+            datasets: [{
+                data: [data.total_pemasukan, data.total_pengeluaran],
+                backgroundColor: ['#00C851aa', '#ff4444aa'],
+                borderColor: ['#007E33', '#CC0000'],
+                borderWidth: 2
+            }]
+        }
+    });
+
+    /* Pie Chart */
+    new Chart(categoryChart, {
+        type: 'pie',
+        data: {
+            labels: data.kategori_labels,
+            datasets: [{
+                data: data.kategori_values,
+                backgroundColor: [
+                    '#ff6384','#36a2eb','#ffcd56','#4bc0c0',
+                    '#9966ff','#ff9f40'
+                ]
+            }]
+        }
+    });
+
+    /* Line Chart */
+    new Chart(trendChart, {
+        type: 'line',
+        data: {
+            labels: data.bulan_labels,
+            datasets: [
+                {
+                    label: 'Pemasukan',
+                    data: data.pemasukan_bulanan,
+                    borderColor: '#00C851',
+                    backgroundColor: '#00C85133',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Pengeluaran',
+                    data: data.pengeluaran_bulanan,
+                    borderColor: '#ff4444',
+                    backgroundColor: '#ff444433',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        }
+    });
+
+});
+</script>
+
+{% endblock %}
